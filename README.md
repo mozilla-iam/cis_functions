@@ -28,15 +28,21 @@ aws_secret_access_key = YOUR_LONGTERM_ACCESS_KEY
 
 I set up a bash alias for convenience after this that looks like:
 
-alias idaws="/Users/akrug/Library/Python/2.7/bin/aws-mfa --device arn:aws:iam::371522382791:mfa/akrug --assume-role arn:aws:iam::656532927350:role/InfosecAdmin --role-session-name \"andrew-mac\""
+alias idaws="/Users/akrug/Library/Python/2.7/bin/aws-mfa --device arn:aws:iam::371522382791:mfa/akrug --assume-role arn:aws:iam::656532927350:role/CISDeveloper --role-session-name \"andrew-mac\""
+
+> Note this should work for any parsys infra account user with MFA.  
 
 My credentials generated in this manner are good for 60-minutes.  I could set up additional aliases for additional profiles if necessary.
 
 After this you can do some iterating on your functions.  One of the really great things about Apex is that you can pass events on stdin via the apex cli for testing.  They actually end up invoked in lambda and return stdout/stderr.
 
-Example: `apex invoke hello < functions/hello/event.json`
+Example: `apex invoke -e dev validator < functions/hello/event.json`
+
+> -e indicates the environment in the name function.dev.json
 
 Do not forget though every time you make a code change locally and want to publish to test you must apex deploy.
+
+Deploy using `apex deploy -e dev`
 
 # AutoLinting
 Automatic linting with pep8 is currently setup via travis-ci.
