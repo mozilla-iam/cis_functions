@@ -1,0 +1,9 @@
+{
+  "runtime": "python3.6",
+  "handler": "main.handle",
+  "description": "The change integration stream consumer that updates the identity vault",
+  "role": "arn:aws:iam::656532927350:role/CISLambdaFunctionRoles-StreamToIDV-T5IH2261NJZM",
+  "hooks":{
+    "build": "pip install -r requirements.txt -t ."
+  }
+}

@@ -1,0 +1,151 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates the roles that the CIS functions will need to use to execute."
+Resources:
+  #Stream Validator Role (The input validator lambda function runs in this role)
+  StreamValidator:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "publisher-write-kinesis"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "*"
+                Resource: "arn:aws:kinesis:*:*:stream/*CISInputStream*"
+        -
+          PolicyName: "invoke-other-cis-functions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:GetFunction"
+                  - "lambda:ListFunctions"
+                Resource: "arn:aws:lambda:*:*:function:cis_functions*"
+  #Stream Identity Vault KCL
+  StreamToIDV:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "write-to-identity-vault"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "dynamodb:*"
+                Resource: "arn:aws:dynamodb:*:*:table/*IdentityVault*"
+        -
+          PolicyName: "invoke-other-cis-functions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:GetFunction"
+                  - "lambda:ListFunctions"
+                Resource: "arn:aws:lambda:*:*:function:cis_functions*"
+  #DynamoDB Stream Subscriber for Identity Drivers
+  IDVtoIDMDriver:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "read-vault-dynamo-stream"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "dynamodb:*"
+                Resource: "arn:aws:dynamodb:*:*:table/*IdentityVault*"
+        -
+          PolicyName: "invoke-other-cis-functions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:GetFunction"
+                  - "lambda:ListFunctions"
+                Resource: "arn:aws:lambda:*:*:function:cis_functions*"
+  #DynamoDB Stream Subscriber for Group loopback driver
+  IDVtoIDV:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "loopback-vault-admin-self"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "dynamodb:*"
+                Resource: "arn:aws:dynamodb:*:*:table/*IdentityVault*"
+        -
+          PolicyName: "invoke-other-cis-functions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                  - "lambda:GetFunction"
+                  - "lambda:ListFunctions"
+                Resource: "arn:aws:lambda:*:*:function:cis_functions*"

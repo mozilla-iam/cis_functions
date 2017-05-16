@@ -1,0 +1,9 @@
+{
+  "runtime": "python3.6",
+  "handler": "main.handle",
+  "description": "The change integration service validator.",
+  "role": "arn:aws:iam::656532927350:role/CISLambdaFunctionRoles-StreamValidator-12UNGHKGTAIIK",
+  "hooks":{
+    "build": "pip install -r requirements.txt -t ."
+  }
+}

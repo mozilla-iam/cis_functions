@@ -1,0 +1,9 @@
+{
+  "runtime": "python3.6",
+  "handler": "main.handle",
+  "description": "The change integration service identity vault to auth0 driver.",
+  "role": "arn:aws:iam::656532927350:role/CISLambdaFunctionRoles-IDVtoIDMDriver-22W44UZPPRSX",
+  "hooks":{
+    "build": "pip install -r requirements.txt -t ."
+  }
+}

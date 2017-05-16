@@ -1,0 +1,9 @@
+{
+  "runtime": "python3.6",
+  "handler": "main.handle",
+  "description": "The change integration service identity vault loopback operations.",
+  "role": "arn:aws:iam::656532927350:role/CISLambdaFunctionRoles-IDVtoIDV-8AMFBTKC70WN",
+  "hooks":{
+    "build": "pip install -r requirements.txt -t ."
+  }
+}
