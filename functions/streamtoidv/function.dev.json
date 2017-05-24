@@ -4,6 +4,7 @@
   "description": "The change integration stream consumer that updates the identity vault",
   "role": "arn:aws:iam::656532927350:role/CISLambdaFunctionRoles-StreamToIDV-T5IH2261NJZM",
   "hooks":{
-    "build": "pip install -r requirements.txt -t ."
+    "build": "pip3 install -r requirements.txt -t .",
+    "clean": "find . -d -not -name \"..\" -not -name \".\" -not -name \"*.json\" -not -name \"main.py\" -not -name \"function.*\" -not -name \"requirements.txt\" | xargs rm -fr &> /dev/null && find . -type f -name \"*.py\" -name \"*.so\" -not -name \"*.json\" -not -name \"main.py\" -not -name \"function.*\" -not -name \"requirements.txt\" | xargs rm -fr &> /dev/null"
   }
 }
