@@ -28,6 +28,7 @@ aws_secret_access_key = YOUR_LONGTERM_ACCESS_KEY
 
 I set up a bash alias for convenience after this that looks like:
 
+
 alias idaws="/Users/akrug/Library/Python/2.7/bin/aws-mfa --device arn:aws:iam::371522382791:mfa/akrug --assume-role arn:aws:iam::656532927350:role/CISDeveloper --role-session-name \"andrew-mac\""
 
 > Note this should work for any parsys infra account user with MFA.  
@@ -46,5 +47,15 @@ Deploy using `apex deploy -e dev`
 
 # AutoLinting
 Automatic linting with pep8 is currently setup via travis-ci.
+
+# Deploying using the Docker Container ( recommended )
+
+See the container project for the reasons why you'd want to use the container instead:
+
+1. Run a shell in the prepacked lambda container environment.
+
+`docker run -ti -v ~/.aws:/root/.aws -v ~/workspace/cis_functions/:/workspace mozillaiam/docker-apex:latest /bin/bash`
+
+2. Do business as usual.  
 
 # CI/CD pipelines (Pending)
