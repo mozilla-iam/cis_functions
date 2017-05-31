@@ -32,7 +32,7 @@ from datetime import datetime
 from logging import NullHandler
 
 
-def set_stream_logger(name="cis-streamtoidv", level=logging.INFO, format_string=None):
+def set_stream_logger(name="cis-idvtoauth0", level=logging.INFO, format_string=None):
     """
     :Stream logger class borrowed from https://github.com/threatresponse/aws_ir
     """

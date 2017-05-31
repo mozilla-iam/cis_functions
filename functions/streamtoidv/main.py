@@ -11,7 +11,7 @@ def handle(event, context):
     # Log level can be environment driven later in development.
     log_level = logging.INFO
     utils.set_stream_logger(level=log_level)
-    logger = logging.getLogger('cis-validator')
+    logger = logging.getLogger('cis-streamtoidv')
     logger.info("Stream Processor initialized.")
 
     for record in event['Records']:
