@@ -4,11 +4,25 @@ import boto3
 import credstash
 import json
 import logging
+import os
 import utils
 
-def find_user(user_id):
-    client = boto3.client('dyanmodb')
 
+"""Find user function should move to CIS core."""
+def find_user(user_id):
+    table_name = os.getenv('CIS_DYNAMODB_TABLE', None)
+    dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+    table = dynamodb.Table(table_name)
+    try:
+        res = table.get_item(
+            Key={
+                'user_id': user_id
+            }
+
+        )
+        return res.get('Item', None)
+    except ResourceNotFoundException as ex:
+        return None
 
 def handle(event, context):
 
@@ -50,12 +64,17 @@ def handle(event, context):
 
         logger.info("Initial payload decoded.")
         logger.info("Searching for dynamo record for {u}".format(u=user_id))
-        profile = {}
+        profile = find_user(user_id)
 
-        # Push profile to webtask for processing
+        logger.info("Status of profile search is {s}".format(s=profile))
 
-        # res = client.update_user(user_id, profile)
-        # logger.info("Status of message processing is {s}".format(s=res))
+        if profile is not None:
+            res = client.update_user(user_id, profile)
+            logger.info("Status of message processing is {s}".format(s=res))
+        else:
+            logger.critical(
+                "User could not be matched in vault for userid : {user_id}".format(user_id=user_id)
+            )
 
     logger.info(
         'Successfully processed {} records.'.format(len(event['Records']))

@@ -51,7 +51,7 @@ def wrapper():
     """
 
     event_file = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), 'event.json'
+        os.path.abspath(os.path.dirname(__file__)), 'event-krug.json'
     )
 
     with open(event_file, 'r') as event_data:
