@@ -25,6 +25,8 @@ import http.client
 import sys
 import json
 import time
+import logging
+import utils
 
 class DotDict(dict):
     """
@@ -40,14 +42,6 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
-# Demo helper functions
-def fatal(msg):
-    print(msg)
-    sys.exit(1)
-
-def debug(msg):
-    sys.stderr.write('+++ {}\n'.format(msg))
-
 class CISAuthZero():
     def __init__(self, config):
         self.default_headers = { 'content-type': "application/json" }
@@ -58,6 +52,10 @@ class CISAuthZero():
         self.access_token_scope = None
         self.access_token_valid_until = 0
         self.conn = http.client.HTTPSConnection(config.uri)
+
+        log_level = logging.INFO
+        utils.set_stream_logger(level=log_level)
+        self.logger = logging.getLogger('CISAuthZero')
 
     def __del__(self):
         self.client_secret = None
@@ -130,7 +128,7 @@ class CISAuthZero():
     def _check_http_response(self, response):
         """Check that we got a 2XX response from the server, else bail out"""
         if (response.status >= 300) or (response.status < 200):
-            debug("_check_http_response() HTTP communication failed: {} {}".format(
+            self.logger.debug("_check_http_response() HTTP communication failed: {} {}".format(
                 response.status, response.reason, response.read()
                 )
             )
