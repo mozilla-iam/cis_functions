@@ -1,9 +1,14 @@
 """ This is the body of the lambda function """
-
-import base64
+import auth0
+import boto3
+import credstash
 import json
 import logging
 import utils
+
+def find_user(user_id):
+    client = boto3.client('dyanmodb')
+
 
 def handle(event, context):
 
@@ -14,26 +19,43 @@ def handle(event, context):
     logger = logging.getLogger('cis-idvtoauth0')
     logger.info("Stream Processor initialized.")
 
-    print(event)
+    # New up the config object for CISAuth0
+    config = auth0.DotDict(dict())
+    config.client_id = credstash.getSecret(
+        name="cis.client_id",
+        context={'app': 'cis', 'environment': 'dev'},
+        region="us-east-1"
+    )
+
+    config.client_secret = credstash.getSecret(
+        name="cis.client_secret",
+        context={'app': 'cis', 'environment': 'dev'},
+        region="us-east-1"
+    )
+
+    config.uri = credstash.getSecret(
+        name="cis.uri",
+        context={'app': 'cis', 'environment': 'dev'},
+        region="us-east-1"
+    )
+
+    client = auth0.CISAuthZero(config)
+    access_token = client.get_access_token()
 
     for record in event['Records']:
         # Kinesis data is base64 encoded so decode here
         logger.info("Record is loaded.")
-
-        payload = json.loads(
-            (record['dynamodb']['NewImage']).decode('utf-8')
-        )
-
-        logger.info(payload)
+        logger.info("Processing {record}".format(record=record))
+        user_id = record['dynamodb']['Keys']['user_id']['S']
 
         logger.info("Initial payload decoded.")
+        logger.info("Searching for dynamo record for {u}".format(u=user_id))
+        profile = {}
 
-        # To do Push the event out to the auth0 webtask for processing
+        # Push profile to webtask for processing
 
-        # Kang puts request code here!
-        # This will call a bit of nodejs then get result
-        # If success log success
-        # If fail dead letter the event ( POST OKR )
+        # res = client.update_user(user_id, profile)
+        # logger.info("Status of message processing is {s}".format(s=res))
 
     logger.info(
         'Successfully processed {} records.'.format(len(event['Records']))

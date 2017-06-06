@@ -1,7 +1,7 @@
 """ Mozilla Change Integration Service Validator.
 
 This lambda function is invoked by a change integration service producer like
-Mozillian's.
+mozillians.org.
 
 Call:  synchronously using boto3('lambda') client.
 Takes: an event containing a user profile

@@ -5,6 +5,7 @@ import utils
 
 from cis import validation, encryption
 
+
 def handle(event, context):
 
     # Initialize Stream Logger
@@ -46,7 +47,6 @@ def handle(event, context):
                 status=res
             )
         )
-
 
         # To do scan the vault for this object.  If a version exists log.
         # Alternatively this could go to some sort of version table.

@@ -1,4 +1,4 @@
-__version__ = '0.0.1'
+import logging
 
 """
 The MIT License (MIT)
@@ -25,12 +25,6 @@ SOFTWARE.
 
 """
 
-import os
-import logging
-import time
-from datetime import datetime
-from logging import NullHandler
-
 
 def set_stream_logger(name="cis-validator", level=logging.INFO, format_string=None):
     """
@@ -50,4 +44,4 @@ def set_stream_logger(name="cis-validator", level=logging.INFO, format_string=No
     streamHandler.setFormatter(streamFormatter)
     logger.addHandler(streamHandler)
 
-logging.getLogger('cis-validator').addHandler(NullHandler())
+logging.getLogger('cis-validator').addHandler(logging.NullHandler())

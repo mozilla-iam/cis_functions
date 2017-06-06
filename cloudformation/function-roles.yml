@@ -128,6 +128,18 @@ Resources:
                   - "lambda:GetFunction"
                   - "lambda:ListFunctions"
                 Resource: "arn:aws:lambda:*:*:function:cis_functions*"
+        -
+          PolicyName: "read-credstash-db"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "dynamodb:GetItem"
+                  - "dynamodb:Query"
+                  - "dynamodb:Scan"
+                Resource: "arn:aws:dynamodb:*:*:table/credential-store"
   #DynamoDB Stream Subscriber for Group loopback driver
   IDVtoIDV:
     Type: "AWS::IAM::Role"
