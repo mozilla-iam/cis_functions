@@ -65,18 +65,26 @@ class CISAuthZero():
 
     def update_user(self, user_id, new_profile):
         """
+        user_id: string
+        new_profile: dict (can be a JSON string loaded with json.loads(str) for example)
+
         Update a user in auth0 and return it as a dict to the caller.
         Auth0 API doc: https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
         Auth0 API endpoint: PATCH /api/v2/users/{id}
         Auth0 API parameters: id (user_id, required), body (required)
         """
+
         payload = DotDict(dict())
+        assert type(new_profile) is dict
+        # Auth0 does not allow passing the user_id attribute
+        # as part of the payload (it's in the PATCH query already)
+        if 'user_id' in new_profile.keys():
+            del new_profile['user_id']
         payload.app_metadata = new_profile
+        # This validates the JSON as well
         payload_json = json.dumps(payload)
 
         self.conn.request("PATCH", "/api/v2/users/{}".format(user_id), payload_json, self._authorize(self.default_headers))
-        print(dir(self.conn))
-        print(self._authorize(self.default_headers))
         res = self.conn.getresponse()
         self._check_http_response(res)
         user = DotDict(json.loads(res.read()))
