@@ -81,19 +81,9 @@ Resources:
       BatchSize: 10
       Enabled: True
       EventSourceArn:
-        Fn::Join:
-          - ""
-          -
-            - "arn:aws:kinesis:"
-            -
-              Ref: "AWS::Region"
-            - ":"
-            -
-              Ref: "AWS::AccountId"
-            - ":table/"
-            -
-              Ref: "IdentityVaultUsers"
-            - "/stream"
+        Fn::GetAtt:
+          - IdentityVaultUsers
+          - StreamArn
       FunctionName:
         !Ref VaultProcessorARN
       StartingPosition: LATEST

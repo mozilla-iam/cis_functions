@@ -23,4 +23,6 @@ Role ARNs for Development:
 6. Setup the event handlers and identity vault.  You will need to supply the ARNs of authzeros function and the
 stream to vault function.
 7. Take note of the ARN of the DynamoDB and CISInput stream.  Add those to function.*.json for the environment and
-redeploy using `apex -e $ENVIRONMENT deploy`.
+redeploy using `apex -e $ENVIRONMENT deploy`
+
+> Note: should a function ever be undeployed the event system will need to be setup again.

@@ -12,7 +12,7 @@
 region="us-east-1"
 
 #Update the role here
-role="CISLambdaFunctionRoles-IDVtoIDMDriver-22W44UZPPRSX"
+role="CIS-Staging-Roles-IDVtoIDMDriver-1UOEZCZI1TOVR"
 export AWS_DEFAULT_REGION="us-east-1"
 
 #Grant command
