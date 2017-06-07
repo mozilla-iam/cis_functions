@@ -25,6 +25,8 @@ import http.client
 import sys
 import json
 import time
+import logging
+import utils
 
 class DotDict(dict):
     """
@@ -40,14 +42,6 @@ class DotDict(dict):
                 value = DotDict(value)
             self[key] = value
 
-# Demo helper functions
-def fatal(msg):
-    print(msg)
-    sys.exit(1)
-
-def debug(msg):
-    sys.stderr.write('+++ {}\n'.format(msg))
-
 class CISAuthZero():
     def __init__(self, config):
         self.default_headers = { 'content-type': "application/json" }
@@ -59,24 +53,36 @@ class CISAuthZero():
         self.access_token_valid_until = 0
         self.conn = http.client.HTTPSConnection(config.uri)
 
+        log_level = logging.INFO
+        utils.set_stream_logger(level=log_level)
+        self.logger = logging.getLogger('CISAuthZero')
+
     def __del__(self):
         self.client_secret = None
         self.conn.close()
 
     def update_user(self, user_id, new_profile):
         """
+        user_id: string
+        new_profile: dict (can be a JSON string loaded with json.loads(str) for example)
+
         Update a user in auth0 and return it as a dict to the caller.
         Auth0 API doc: https://manage-dev.mozilla.auth0.com/docs/api/management/v2#!/Users/patch_users_by_id
         Auth0 API endpoint: PATCH /api/v2/users/{id}
         Auth0 API parameters: id (user_id, required), body (required)
         """
+
         payload = DotDict(dict())
+        assert type(new_profile) is dict
+        # Auth0 does not allow passing the user_id attribute
+        # as part of the payload (it's in the PATCH query already)
+        if 'user_id' in new_profile.keys():
+            del new_profile['user_id']
         payload.app_metadata = new_profile
+        # This validates the JSON as well
         payload_json = json.dumps(payload)
 
         self.conn.request("PATCH", "/api/v2/users/{}".format(user_id), payload_json, self._authorize(self.default_headers))
-        print(dir(self.conn))
-        print(self._authorize(self.default_headers))
         res = self.conn.getresponse()
         self._check_http_response(res)
         user = DotDict(json.loads(res.read()))
@@ -122,7 +128,7 @@ class CISAuthZero():
     def _check_http_response(self, response):
         """Check that we got a 2XX response from the server, else bail out"""
         if (response.status >= 300) or (response.status < 200):
-            debug("_check_http_response() HTTP communication failed: {} {}".format(
+            self.logger.debug("_check_http_response() HTTP communication failed: {} {}".format(
                 response.status, response.reason, response.read()
                 )
             )

@@ -1,5 +1,5 @@
 """ This is the body of the lambda function """
-import auth0
+import authzero
 import boto3
 import credstash
 import json
@@ -33,8 +33,8 @@ def handle(event, context):
     logger = logging.getLogger('cis-idvtoauth0')
     logger.info("Stream Processor initialized.")
 
-    # New up the config object for CISAuth0
-    config = auth0.DotDict(dict())
+    # New up the config object for CISAuthZero
+    config = authzero.DotDict(dict())
     config.client_id = credstash.getSecret(
         name="cis.client_id",
         context={'app': 'cis', 'environment': 'dev'},
@@ -53,7 +53,7 @@ def handle(event, context):
         region="us-east-1"
     )
 
-    client = auth0.CISAuthZero(config)
+    client = authzero.CISAuthZero(config)
     access_token = client.get_access_token()
 
     for record in event['Records']:
