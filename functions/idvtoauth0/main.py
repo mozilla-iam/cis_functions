@@ -34,23 +34,31 @@ def handle(event, context):
     logger = logging.getLogger('cis-idvtoauth0')
     logger.info("Stream Processor initialized.")
 
+
+    environment = os.getenv('ENVRIONMENT', 'dev')
+
+    if environment == 'production':
+        environment = 'prod'
+    else:
+        environment = 'dev'
+
     # New up the config object for CISAuthZero
     config = authzero.DotDict(dict())
     config.client_id = credstash.getSecret(
         name="cis.client_id",
-        context={'app': 'cis', 'environment': 'dev'},
+        context={'app': 'cis', 'environment': environment},
         region="us-east-1"
     )
 
     config.client_secret = credstash.getSecret(
         name="cis.client_secret",
-        context={'app': 'cis', 'environment': 'dev'},
+        context={'app': 'cis', 'environment': environment},
         region="us-east-1"
     )
 
     config.uri = credstash.getSecret(
         name="cis.uri",
-        context={'app': 'cis', 'environment': 'dev'},
+        context={'app': 'cis', 'environment': environment},
         region="us-east-1"
     )
 
