@@ -26,8 +26,7 @@ import http.client
 import json
 import time
 import logging
-import utils
-
+from cis import utils
 
 class DotDict(dict):
     """
@@ -58,7 +57,12 @@ class CISAuthZero():
         self.conn = http.client.HTTPSConnection(config.uri)
 
         log_level = logging.INFO
-        utils.set_stream_logger(level=log_level)
+
+        sl = utils.StructuredLogger(
+            name='cis-idvtoauth0',
+            level=logging.INFO
+        )
+
         self.logger = logging.getLogger('CISAuthZero')
 
     def __del__(self):

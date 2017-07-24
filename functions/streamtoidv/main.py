@@ -30,7 +30,7 @@ def handle(event, context):
         # Decrypt using the CIS library.  Each field is b64encoded as well.
         decrypted_payload = (
             json.loads(
-                encryption.decrypt(
+                encryption.decrypt_payload(
                     ciphertext=base64.b64decode(payload['ciphertext']),
                     ciphertext_key=base64.b64decode(payload['ciphertext_key']),
                     iv=base64.b64decode(payload['iv']),

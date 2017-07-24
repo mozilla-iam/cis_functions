@@ -9,11 +9,11 @@
 #####################################
 
 
-region="us-east-1"
+region="us-west-2"
 
 #Update the role here
 role="cis-prod-roles-IDVtoIDMDriver-1RCFMGZADHHFK"
-export AWS_DEFAULT_REGION="us-east-1"
+export AWS_DEFAULT_REGION="us-west-2"
 
 #Grant command
 credstash_key_id="`aws --region $region kms list-aliases --query "Aliases[?AliasName=='alias/credstash'].TargetKeyId | [0]" --output text`"

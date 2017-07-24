@@ -47,19 +47,19 @@ def handle(event, context):
     config.client_id = credstash.getSecret(
         name="cis.client_id",
         context={'app': 'cis', 'environment': environment},
-        region="us-east-1"
+        region="us-west-2"
     )
 
     config.client_secret = credstash.getSecret(
         name="cis.client_secret",
         context={'app': 'cis', 'environment': environment},
-        region="us-east-1"
+        region="us-west-2"
     )
 
     config.uri = credstash.getSecret(
         name="cis.uri",
         context={'app': 'cis', 'environment': environment},
-        region="us-east-1"
+        region="us-west-2"
     )
 
     client = authzero.CISAuthZero(config)
