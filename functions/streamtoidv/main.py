@@ -29,8 +29,6 @@ def handle(event, context):
             base64.b64decode(record['kinesis']['data']).decode('utf-8')
         )
 
-        print(payload)
-
         logger.info("Initial payload decoded.")
 
         p = processor.Operation(
