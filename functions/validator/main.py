@@ -10,14 +10,13 @@ Does:  validate the user profile against the json schema for Mozilla users.
 If the profile passes store it in kinesis for processing.
 
 """
-import base64
+import boto3
 import logging
 import os
+
 # Import the Mozilla CIS library to facilitate core logic interaction.
-from cis import encryption
-from cis import streams
-from cis import validation
-from cis import utils
+from cis import processor
+from cis.libs import utils
 
 def handle(event, context):
     """This is the main handler called during function invocation."""
@@ -29,38 +28,16 @@ def handle(event, context):
 
     logger = logging.getLogger('cis-validator')
 
-    payload = {}
-    payload['ciphertext'] = event['ciphertext']
-    payload['tag'] = event['tag']
-    payload['ciphertext_key'] = event['ciphertext_key']
-    payload['iv'] = event['iv']
+    p = processor.Operation(
+        boto_session=boto3.Session(region_name='us-west-2'),
+        publisher=event.get('publisher'),
+        signature=event.get('signature'),
+        encrypted_profile_data=event.get('profile')
+    )
 
-    # Require publisher to add partition key in event
-    publisher = "mozillians.org"
-    #publisher = str(base64.b64decode(event.get('publisher').decode('utf-8')))
+    result = p.run()
 
-
-    # Initialize Stream Logger
-    # Log level can be environment driven later in development.
-
-    logger.info("Validator successfully initialized.")
-
-    payload_status = validation.validate(publisher, **payload)
-
-    if payload_status is True:
-        logger.info("Payload is valid sending to kinesis.")
-
-        decrypted_profile = encryption.decrypt_payload(**payload)
-
-        res = streams.publish_to_cis(
-            data=decrypted_profile,
-            partition_key=publisher
-        )
-
-        return True
-    else:
-        logger.info("Payload is invalid rejecting payload.")
-        return False
+    logger.info('The result of the change operation was {r}'.format(r=result))
 
 def wrapper():
     """Helper for easily calling this from a command line locally.
@@ -75,7 +52,19 @@ def wrapper():
     )
 
     with open(event_file, 'r') as event_data:
-        event = (event_data.read().encode('utf-8'))
+        profile_data = (event_data.read().encode('utf-8'))
 
-    event = encryption.encrypt_payload(event)
+
+    from cis.libs import encryption
+
+    encryptor = encryption.Operation(boto_session=boto3.Session(region_name='us-west-2'))
+
+    event = {
+        'publisher': {'id': 'mozillians.org'},
+        'signature': {},
+        'profile': encryptor.encrypt(profile_data)
+    }
+
+    print(event)
+
     res = handle(event, None)

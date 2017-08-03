@@ -5,7 +5,7 @@ import credstash
 import logging
 import os
 
-from cis import utils
+from cis.libs import utils
 from botocore.exceptions import ClientError
 
 

@@ -16,4 +16,4 @@ pyparsing==2.2.0
 pluginbase==0.5
 everett==0.9
 credstash==1.13.2
-git+git://github.com/mozilla-iam/cis.git
+git+git://github.com/andrewkrug/cis.git@oo_refactor
