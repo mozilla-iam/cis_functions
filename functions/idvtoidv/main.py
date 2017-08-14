@@ -1,5 +1,5 @@
 import logging
-from cis import utils
+from cis.libs import utils
 
 
 def handle(event, context):
