@@ -5,11 +5,11 @@ import credstash
 import logging
 import os
 
-from cis.libs import utils
+
 from botocore.exceptions import ClientError
+from cis.libs import utils
 
 
-# TODO: function should move to CIS core.
 def find_user(user_id):
     table_name = os.getenv('CIS_DYNAMODB_TABLE', None)
     dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -26,14 +26,13 @@ def find_user(user_id):
 
 
 def handle(event, context):
-    sl = utils.StructuredLogger(
+    utils.StructuredLogger(
         name='cis-idvtoauth0',
         level=logging.INFO
     )
 
     logger = logging.getLogger('cis-idvtoauth0')
     logger.info("Stream Processor initialized.")
-
 
     environment = os.getenv('ENVIRONMENT', 'dev')
 

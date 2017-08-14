@@ -1,14 +1,15 @@
-import boto3
 import base64
+import boto3
 import json
 import logging
 
-from cis import processor
 from cis.libs import utils
+from cis import processor
+
 
 def handle(event, context):
 
-    sl = utils.StructuredLogger(
+    utils.StructuredLogger(
         name='cis-streamtoidv',
         level=logging.INFO
     )

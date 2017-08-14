@@ -14,17 +14,16 @@ import base64
 import boto3
 import json
 import logging
-import os
 
 # Import the Mozilla CIS library to facilitate core logic interaction.
-from cis import processor
 from cis.libs import utils
+from cis import processor
+
 
 def handle(event, context):
     """This is the main handler called during function invocation."""
-    # print(base64.bevent.get('profile'))
 
-    sl = utils.StructuredLogger(
+    utils.StructuredLogger(
         name='cis-validator',
         level=logging.INFO
     )
