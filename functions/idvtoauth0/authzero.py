@@ -26,7 +26,8 @@ import http.client
 import json
 import time
 import logging
-from cis import utils
+from cis.libs import utils
+
 
 class DotDict(dict):
     """

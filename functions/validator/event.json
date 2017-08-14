@@ -1,70 +1,9 @@
 {
-	"user_id": "ad|Mozilla-LDAP-Dev|lmcardle",
-	"timezone": "Europe/London",
-	"active": true,
-	"lastModified": "2017-03-09T21:28:51.851Z",
-	"created": "2017-03-09T21:28:51.851Z",
-	"userName": "lmcardle@mozilla.com",
-	"displayName": "Leo McArdle",
-	"firstName": "Leo",
-	"lastName": "McArdle",
-	"preferredLanguage": "en_US",
-	"primaryEmail": "lmcardle@mozilla.com",
-	"emails": [
-		{
-			"value": "lmcardle@mozilla.com",
-			"verified": true,
-			"primary": true,
-			"name": "work"
-		},
-		{
-			"value": "leomcardle@gmail.com",
-			"verified": true,
-			"name": "personal"
-		}
-	],
-	"phoneNumbers": [
-	],
-	"uris": [
-	],
-	"nicknames": [
-	],
-	"SSHFingerprints": [
-	],
-	"PGPFingerprints": [
-	],
-	"picture": "https://s.gravatar.com/avatar/ec6e85d15f8411d32f97f5d8a4eab2d3?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Flm.png",
-	"shirtSize": "M",
-	"groups": [
-		"ldapGroup1",
-		"mozillian_MozGroup1",
-		"workday_EIS1",
-		"mozillian_iam_project"
-	],
-	"authoritativeGroups": [
-			{
-				"created": "2010-01-23T04:56:22Z",
-				"lastUsed": "2010-01-23T04:56:22Z",
-				"name": "moco",
-				"uuid": "reserved_mozilla_1"
-			},
-			{
-				"created": "2010-01-23T04:56:22Z",
-				"lastUsed": "2010-01-23T04:56:22Z",
-				"name": "mofo",
-				"uuid": "reserved_mozilla_2"
-			},
-			{
-				"created": "2010-01-23T04:56:22Z",
-				"lastUsed": "2010-01-23T04:56:22Z",
-				"name": "nda",
-				"uuid": "reserved_mozilla_3"
-			},
-			{
-				"created": "2010-01-23T04:56:22Z",
-				"lastUsed": "2010-01-23T04:56:22Z",
-				"name": "mozdef1.private.scl3.gmail",
-				"uuid": "5a5munnfxYjqkaN0su1Kl7USxbqkILQN"
-			}
-		]
+    "profile": "eyJjaXBoZXJ0ZXh0IjogIlVXbW5yeEF2OVVVSjBsemZjNzRMV3NYWGFFZmdTYU4zNmt2UUFpaEtRR1Y2Z3UwcFZOcU5Tc0Jyc0ZncDQ4ZHJsV0lrbmg2bk1jTEhubGVvT0hrZGRYQ0pWTDg3ZFdVQ3Erak50SVNadE5UZ2hnYnVFTmFsTGhtNlF6QTQ0QWhrNHVaSW9ITEtRb2FpU3E2aGM1TU1JMU1JS1YwTGd6K2JMWGhyR1NXWEt0YzI3bGhTcHlkWmNVK3dSeXFpN3BvOENWdUN5N0J5QlVSdUhuK2pmZ2JNN015YmhsNWRxNDFyMVlWZ05pdjIvM3Uza0pCNFNlQ0kwV3dKR3lwSTVyS08yYktqYTJyMnJsWlBOSjg3ZEZqQkxSQzFvcldHdjZTWXhhVHUvWXVIWndmRzVOMnRXREpwbWZ5dnVOOTBab3krc0JiVGtjUVMvWmpuYmc4MlBoUnczRWIzdEF4RTBzaERoRGx2aXdpc0VRZ01vb1Zic3lUY3hmekdSSlh1aEtHcldnQ0xVWUFqYkk4VzZvM05iMXhQQ0phTHRBdDhNQVNESHduN05yZ1ZFTHJESzUrNmVUcEMzeDY3b3U3aWFCOVBzeHJmQkpZOExjTlN5aHEyM291ODIvOGhzbHJOZWwyb3R0alNUZFhpanZLNEtvcEVwZ0xUSWJHa3ZxNlM5VFNCSmZYOFhaOHFSdkRjdjNsaDlOZkEzZVVYNVR0bUJlRlRCWmE0RUcvY2s0TUhuclYyVEtjQnBNY1QzRCs2cFI1eDlFbEw4MHJIemJHZjZjSCtXRnppYXdBZk4rYk4rU2hhZkg2a1Ura2MvbWpEL0pUZSszdEprc2dad01aSmx4WHhWKzFJZzk0U0xnUFhqeGVJWHlnNGpTNVBmekF3SWVxNjcybmRxdVI0WFJFcFRneEM5TzkyR0s1QWlrb2krM1BqT3RqUld6OUFudDhLMm41dU95aEFJeTdjNEtXQnkvaDV3eXYvdlFrd1o4UVdQL3RtaEpmakNpTFk2UHRLaWFQUng1aDllM1ZFdXNyM2N4OXBYbzFpRUJocm9INWNvOWdBelNzWGVwV1dCSWlUcjcwNUY5UEZEWXpISHNTU3dNenVPVWVXeVI3cnhxUUJoeUtKNm5QYUlpMFpTb0UvNVpGcWN6cFoxKzVrTmt6R2N3Q242OU9HUVg3a3lSU3FOYWRmVFRCcjlOUHYrZjFWclhjRHBtdVlTQVhnRkYya3pMbFlnQmcvQlJyZHdyOXNXUE1rSk9ZS0lQNzA4b0tXRHhWMGNpZjk1aC9tY3lvRDkzeVFRMm5LMS93ZDY2cU4iLCAidGFnIjogIkh1Y1NCbDdGbm9vNEFZeGszeENOeXc9PSIsICJjaXBoZXJ0ZXh0X2tleSI6ICJBUUlEQUhoRFEwN1o3ZFlSdkRCUFVXRm52TXlhYVp6M2RxK2UvYVFVaSttMitsVjYyUUdTUmtBRjRMTS9leGVPQ0h6ZGlaTTZBQUFBZmpCOEJna3Foa2lHOXcwQkJ3YWdiekJ0QWdFQU1HZ0dDU3FHU0liM0RRRUhBVEFlQmdsZ2hrZ0JaUU1FQVM0d0VRUU1PaWk0ODJlVmR1ZHB4Qm9RQWdFUWdEdE9hcU5UVlFiZStSZEc2MkpydTJxeFVHeDlGUE1Da0RuSDNteTBydGZuRVhvWTZzcWhVa0pPZlhST3lSRnFEcVJHVmI0SExvQXRZRmF2aWc9PSIsICJpdiI6ICJrZ2hmYjVqbWwrdGVHaEN6In0=",
+    "publisher": {
+        "id": "__mozillians.org"
+
+    }, "signature": {
+
+    }
 }

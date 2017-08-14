@@ -35,11 +35,12 @@ def handle(event, context):
     logger.info("Stream Processor initialized.")
 
 
-    environment = os.getenv('ENVRIONMENT', 'dev')
+    environment = os.getenv('ENVIRONMENT', 'dev')
 
     if environment == 'production':
         environment = 'prod'
     else:
+        logger.info('Development stage recognized.  Applying to credstash.')
         environment = 'dev'
 
     # New up the config object for CISAuthZero
