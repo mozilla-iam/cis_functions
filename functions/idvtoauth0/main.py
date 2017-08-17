@@ -87,15 +87,19 @@ def handle(event, context):
             # XXX Force-integrate LDAP groups as these are synchronized
             # from LDAP to Auth0 directly.
             # This is to be removed when LDAP feeds CIS.
-            upstream_user = client.get_user(user_id)
+            try:
+                upstream_user = client.get_user(user_id)
 
-            if 'groups' in upstream_user.keys():
-                for g in upstream_user['groups']:
-                    if g not in profile['groups']:
-                        profile['groups'].append(g)
-                        logger.info("Forced re-integration of LDAP group {}".format(g))
+                if 'groups' in upstream_user.keys():
+                    for g in upstream_user['groups']:
+                        if g not in profile['groups']:
+                            profile['groups'].append(g)
+                            logger.info("Forced re-integration of LDAP group {}".format(g))
 
-            res = client.update_user(user_id, profile)
+                res = client.update_user(user_id, profile)
+            except Exception as e:
+                """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
+                res = e
             logger.info("Status of message processing is {s}".format(s=res))
         else:
             logger.critical(
