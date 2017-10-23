@@ -20,7 +20,14 @@ def find_user(user_id):
                 'user_id': user_id
             }
         )
-        return res.get('Item', None)
+        profile = res.get('Item', None)
+
+        # Fix null values workaround for DynamoDB limitation
+        if profile and profile['groups'] == 'NULL':
+            profile['groups'] = []
+
+        return profile
+
     except ClientError:
         return None
 
