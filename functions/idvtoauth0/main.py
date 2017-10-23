@@ -88,7 +88,7 @@ def handle(event, context):
             # Profile whitelisting. This allows to select which user profiles are
             # to be integrated using CIS, mainly for transitioning purposes.
             # See also: https://mozillians.org/en-US/group/cis_whitelist
-            if 'mozilliansorg_cis_whitelist' not in profile['groups']:
+            if profile['groups'] and 'mozilliansorg_cis_whitelist' not in profile['groups']:
                 continue
 
             # XXX Force-integrate LDAP groups as these are synchronized
