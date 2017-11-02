@@ -20,9 +20,33 @@ def find_user(user_id):
                 'user_id': user_id
             }
         )
-        return res.get('Item', None)
+        profile = res.get('Item', None)
+
+        # Fix null values workaround for DynamoDB limitation
+        if profile and profile['groups'] == 'NULL':
+            profile['groups'] = []
+
+        return profile
+
     except ClientError:
         return None
+
+
+def _denullify_empty_values(data):
+    """
+    Opposite of https://github.com/akatsoulas/cis/blob/8c8da24b2c215d02f5e14dec7a94da6b1792c8c9/cis/publisher.py#L80
+    Remove `NULL` and replace it back by empty string
+    """
+    new = {}
+    for k in data.keys():
+        v = data[k]
+        if isinstance(v, dict):
+            v = _denullify_empty_values(v)
+        if v == 'NULL':
+            new[v] = ''
+        else:
+            new[v] = v
+    return new
 
 
 def handle(event, context):
@@ -81,7 +105,7 @@ def handle(event, context):
             # Profile whitelisting. This allows to select which user profiles are
             # to be integrated using CIS, mainly for transitioning purposes.
             # See also: https://mozillians.org/en-US/group/cis_whitelist
-            if 'mozilliansorg_cis_whitelist' not in profile['groups']:
+            if profile['groups'] and 'mozilliansorg_cis_whitelist' not in profile['groups']:
                 continue
 
             # XXX Force-integrate LDAP groups as these are synchronized
@@ -96,7 +120,12 @@ def handle(event, context):
                             profile['groups'].append(g)
                             logger.info("Forced re-integration of LDAP group {}".format(g))
 
-                res = client.update_user(user_id, profile)
+               # XXX Force-convert `NULL` back to empty string, to accomodate the DynamoDB work-around found at:
+               # https://github.com/akatsoulas/cis/blob/8c8da24b2c215d02f5e14dec7a94da6b1792c8c9/cis/publisher.py#L80
+               # So that RP gets the correct value returned (which is empty string)
+               profile = _denullify_empty_values(profile)
+
+               res = client.update_user(user_id, profile)
             except Exception as e:
                 """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
                 res = e
