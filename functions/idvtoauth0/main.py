@@ -105,10 +105,9 @@ def handle(event, context):
             # Profile whitelisting. This allows to select which user profiles are
             # to be integrated using CIS, mainly for transitioning purposes.
             # See also: https://mozillians.org/en-US/group/cis_whitelist
-            if profile['groups'] and 'mozilliansorg_cis_whitelist' not in profile['groups']:
-                logger.info("Skipping reintegration of profile due to not in cis_whitelist {}".format(profile))
-                pass
-            else:
+            logger.info("The profile is {}".format(profile))
+
+            if 'mozilliansorg_cis_whitelist' in profile.get('groups', []):
                 # XXX Force-integrate LDAP groups as these are synchronized
                 # from LDAP to Auth0 directly.
                 # This is to be removed when LDAP feeds CIS.
@@ -130,7 +129,10 @@ def handle(event, context):
                 except Exception as e:
                     """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
                     res = e
-                logger.info("Status of message processing is {s}".format(s=res))
+            else:
+                res = "not processed"
+                pass
+            logger.info("Status of message processing is {s}".format(s=res))
         else:
             logger.critical(
                 "User could not be matched in vault for userid : {user_id}".format(user_id=user_id)
