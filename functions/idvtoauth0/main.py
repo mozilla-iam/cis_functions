@@ -106,30 +106,31 @@ def handle(event, context):
             # to be integrated using CIS, mainly for transitioning purposes.
             # See also: https://mozillians.org/en-US/group/cis_whitelist
             if profile['groups'] and 'mozilliansorg_cis_whitelist' not in profile['groups']:
-                continue
+                logger.info("Skipping reintegration of profile due to not in cis_whitelist {}".format(profile))
+                pass
+            else:
+                # XXX Force-integrate LDAP groups as these are synchronized
+                # from LDAP to Auth0 directly.
+                # This is to be removed when LDAP feeds CIS.
+                try:
+                    upstream_user = client.get_user(user_id)
 
-            # XXX Force-integrate LDAP groups as these are synchronized
-            # from LDAP to Auth0 directly.
-            # This is to be removed when LDAP feeds CIS.
-            try:
-                upstream_user = client.get_user(user_id)
+                    if 'groups' in upstream_user.keys():
+                        for g in upstream_user['groups']:
+                            if g not in profile['groups']:
+                                profile['groups'].append(g)
+                                logger.info("Forced re-integration of LDAP group {}".format(g))
 
-                if 'groups' in upstream_user.keys():
-                    for g in upstream_user['groups']:
-                        if g not in profile['groups']:
-                            profile['groups'].append(g)
-                            logger.info("Forced re-integration of LDAP group {}".format(g))
+                   # XXX Force-convert `NULL` back to empty string, to accomodate the DynamoDB work-around found at:
+                   # https://github.com/akatsoulas/cis/blob/8c8da24b2c215d02f5e14dec7a94da6b1792c8c9/cis/publisher.py#L80
+                   # So that RP gets the correct value returned (which is empty string)
+                   # profile = _denullify_empty_values(profile)
 
-               # XXX Force-convert `NULL` back to empty string, to accomodate the DynamoDB work-around found at:
-               # https://github.com/akatsoulas/cis/blob/8c8da24b2c215d02f5e14dec7a94da6b1792c8c9/cis/publisher.py#L80
-               # So that RP gets the correct value returned (which is empty string)
-               # profile = _denullify_empty_values(profile)
-
-                res = client.update_user(user_id, profile)
-            except Exception as e:
-                """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
-                res = e
-            logger.info("Status of message processing is {s}".format(s=res))
+                    res = client.update_user(user_id, profile)
+                except Exception as e:
+                    """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
+                    res = e
+                logger.info("Status of message processing is {s}".format(s=res))
         else:
             logger.critical(
                 "User could not be matched in vault for userid : {user_id}".format(user_id=user_id)
