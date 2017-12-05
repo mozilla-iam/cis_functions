@@ -35,6 +35,7 @@ def find_user(user_id):
     except ClientError:
         return None
 
+
 def handle(event, context):
     utils.StructuredLogger(
         name='cis-idvtoauth0',
@@ -88,33 +89,26 @@ def handle(event, context):
         logger.info("Status of profile search is {s}".format(s=profile))
 
         if profile is not None:
-            # Profile whitelisting. This allows to select which user profiles are
-            # to be integrated using CIS, mainly for transitioning purposes.
-            # See also: https://mozillians.org/en-US/group/cis_whitelist
             logger.info("The profile is {}".format(profile))
+            try:
+                upstream_user = client.get_user(user_id)
 
-            if 'mozilliansorg_cis_whitelist' in profile.get('groups', []):
-                # XXX Force-integrate LDAP groups as these are synchronized
-                # from LDAP to Auth0 directly.
-                # This is to be removed when LDAP feeds CIS.
-                try:
-                    upstream_user = client.get_user(user_id)
+                # XXX Attempt forced LDAP group reintegration
+                # Remove when we have an LDAP CIS Publisher
+                # And replace with a "user add" and "user remove/block" functionality
+                if 'groups' in upstream_user.keys():
+                    for g in upstream_user['groups']:
+                        if g not in profile['groups']:
+                            profile['groups'].append(g)
+                            logger.info("Forced re-integration of LDAP group {}".format(g))
 
-                    if 'groups' in upstream_user.keys():
-                        for g in upstream_user['groups']:
-                            if g not in profile['groups']:
-                                profile['groups'].append(g)
-                                logger.info("Forced re-integration of LDAP group {}".format(g))
-
-                    profile_groups = {'groups': profile.get('groups')}
-                    res = client.update_user_raw(user_id, profile_groups)
-                    logger.info("Updating user group information in auth0 for {user_id}".format(user_id=user_id))
-                except Exception as e:
-                    """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
-                    res = e
-            else:
-                res = "not processed"
-                pass
+                # Update groups only in Auth0
+                profile_groups = {'groups': profile.get('groups')}
+                res = client.update_user_raw(user_id, profile_groups)
+                logger.info("Updating user group information in auth0 for {user_id}".format(user_id=user_id))
+            except Exception as e:
+                """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
+                res = e
             logger.info("Status of message processing is {s}".format(s=res))
         else:
             logger.critical(
