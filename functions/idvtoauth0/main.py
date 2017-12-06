@@ -104,7 +104,7 @@ def handle(event, context):
 
                 # Update groups only in Auth0
                 profile_groups = {'groups': profile.get('groups')}
-                res = client.update_user_raw(user_id, profile_groups)
+                res = client.update_user(user_id, profile_groups)
                 logger.info("Updating user group information in auth0 for {user_id}".format(user_id=user_id))
             except Exception as e:
                 """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
