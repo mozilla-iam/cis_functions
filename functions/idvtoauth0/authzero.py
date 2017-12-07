@@ -63,7 +63,7 @@ class CISAuthZero(object):
             level=logging.INFO
         )
 
-        self.logger = logging.getLogger('CISAuthZero')
+        self.logger = logging.getLogger('cis-idvtoauth0')
 
     def __del__(self):
         self.client_secret = None
@@ -86,12 +86,38 @@ class CISAuthZero(object):
         user = DotDict(json.loads(res.read()))
         return user
 
+    def update_user_raw(self, user_id, payload):
+        """
+        user_id: string
+        groups: dict (of attributes)
+
+        Update the user's group structure directly. See update_user() to wrap the profile into app_metadata.
+        Returns the new user as a dict to the caller.
+        Auth0 API doc: https://auth0.com/docs/api/management/v2
+        Auth0 API endpoint: PATCH /api/v2/users/{id}
+        Auth0 API parameters: id (user_id, required), body (required)
+        """
+
+        # This validates the JSON as well
+        payload_json = json.dumps(payload)
+
+        self.conn.request("PATCH",
+                          "/api/v2/users/{}".format(user_id),
+                          payload_json,
+                          self._authorize(self.default_headers))
+        res = self.conn.getresponse()
+        self._check_http_response(res)
+        user = DotDict(json.loads(res.read()))
+        return user
+
     def update_user(self, user_id, new_profile):
         """
         user_id: string
         new_profile: dict (can be a JSON string loaded with json.loads(str) for example)
 
         Update a user in auth0 and return it as a dict to the caller.
+        This is done by updating user.app_metadata which is an attribute that Auth0 automatically re-integrate when
+        serving the profile through OIDC APIs, after rules have executed.
         Auth0 API doc: https://auth0.com/docs/api/management/v2
         Auth0 API endpoint: PATCH /api/v2/users/{id}
         Auth0 API parameters: id (user_id, required), body (required)
@@ -104,17 +130,7 @@ class CISAuthZero(object):
         if 'user_id' in new_profile.keys():
             del new_profile['user_id']
         payload.app_metadata = new_profile
-        # This validates the JSON as well
-        payload_json = json.dumps(payload)
-
-        self.conn.request("PATCH",
-                          "/api/v2/users/{}".format(user_id),
-                          payload_json,
-                          self._authorize(self.default_headers))
-        res = self.conn.getresponse()
-        self._check_http_response(res)
-        user = DotDict(json.loads(res.read()))
-        return user
+        return self.update_user_raw(user_id, payload)
 
     def get_access_token(self):
         """
@@ -156,8 +172,9 @@ class CISAuthZero(object):
     def _check_http_response(self, response):
         """Check that we got a 2XX response from the server, else bail out"""
         if (response.status >= 300) or (response.status < 200):
+            tmp = response.read()
             self.logger.debug("_check_http_response() HTTP communication failed: {} {}".format(
-                response.status, response.reason, response.read()
+                response.status, response.reason, tmp
                 )
             )
-            raise Exception('HTTPCommunicationFailed', (response.status, response.reason))
+            raise Exception('HTTPCommunicationFailed', (response.status, response.reason, tmp))
