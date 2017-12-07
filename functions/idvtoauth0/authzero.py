@@ -63,7 +63,7 @@ class CISAuthZero(object):
             level=logging.INFO
         )
 
-        self.logger = logging.getLogger('CISAuthZero')
+        self.logger = logging.getLogger('cis-idvtoauth0')
 
     def __del__(self):
         self.client_secret = None
@@ -86,7 +86,7 @@ class CISAuthZero(object):
         user = DotDict(json.loads(res.read()))
         return user
 
-    def update_user_raw(self, user_id, attr):
+    def update_user_raw(self, user_id, payload):
         """
         user_id: string
         groups: dict (of attributes)
@@ -97,7 +97,6 @@ class CISAuthZero(object):
         Auth0 API endpoint: PATCH /api/v2/users/{id}
         Auth0 API parameters: id (user_id, required), body (required)
         """
-        payload = DotDict(dict())
 
         # This validates the JSON as well
         payload_json = json.dumps(payload)
@@ -173,8 +172,9 @@ class CISAuthZero(object):
     def _check_http_response(self, response):
         """Check that we got a 2XX response from the server, else bail out"""
         if (response.status >= 300) or (response.status < 200):
+            tmp = response.read()
             self.logger.debug("_check_http_response() HTTP communication failed: {} {}".format(
-                response.status, response.reason, response.read()
+                response.status, response.reason, tmp
                 )
             )
-            raise Exception('HTTPCommunicationFailed', (response.status, response.reason))
+            raise Exception('HTTPCommunicationFailed', (response.status, response.reason, tmp))
