@@ -22,7 +22,6 @@ from cis import processor
 
 def handle(event, context):
     """This is the main handler called during function invocation."""
-
     utils.StructuredLogger(
         name='cis-validator',
         level=logging.INFO
@@ -30,17 +29,22 @@ def handle(event, context):
 
     logger = logging.getLogger('cis-validator')
 
-    encrypted_profile_data = json.loads(base64.b64decode(event.get('profile')))
+    # Encrypted profile packet contains ciphertext, iv, etc.
+    encrypted_profile_packet = json.loads(base64.b64decode(event.get('profile').encode()))
+    signature = event.get('signature', None)
 
-    p = processor.ValidatorOperation(
-        boto_session=boto3.Session(region_name='us-west-2'),
-        publisher=event.get('publisher'),
-        signature=event.get('signature'),
-        encrypted_profile_data=encrypted_profile_data
-    )
+    if signature is not None or signature != {}:
+        p = processor.ValidatorOperation(
+            boto_session=boto3.Session(region_name='us-west-2'),
+            publisher=event.get('publisher'),
+            signature=signature,
+            encrypted_profile_data=encrypted_profile_packet
+        )
 
-    result = p.run()
-
-    logger.info('The result of the change operation was {r}'.format(r=result))
+        result = p.run()
+        logger.info('The result of the change operation was {r}'.format(r=result))
+    else:
+        logger.error('No sigature was present.  This operation was untrusted.')
+        result = False
 
     return result
