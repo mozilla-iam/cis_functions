@@ -17,4 +17,5 @@ def handle(event, context):
 
     for record in event['Records']:
         pass
+
     return None
