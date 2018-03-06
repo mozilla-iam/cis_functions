@@ -16,5 +16,6 @@ pyparsing==2.2.0
 pluginbase==0.5
 everett==0.9
 credstash==1.14.0
+cryptography==2.0
 git+git://github.com/mozilla-iam/cis.git
 git+git://github.com/mozilla-iam/pykmssig.git
