@@ -1,8 +1,0 @@
-{
-  "name": "cis_functions",
-  "description": "Serverless functions for Mozilla IDM change integration pipeline. In development.",
-  "memory": 128,
-  "timeout": 250,
-  "role": "arn:aws:iam::656532927350:role/cis_functions_lambda_function",
-  "environment": {}
-}

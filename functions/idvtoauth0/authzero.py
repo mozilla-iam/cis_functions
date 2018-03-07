@@ -28,9 +28,6 @@ import logging
 import time
 
 
-from cis.libs import utils
-
-
 class DotDict(dict):
     """return a dict.item notation for dict()'s"""
 
@@ -57,13 +54,7 @@ class CISAuthZero(object):
         self.access_token_scope = None
         self.access_token_valid_until = 0
         self.conn = http.client.HTTPSConnection(config.uri)
-
-        utils.StructuredLogger(
-            name='cis-idvtoauth0',
-            level=logging.INFO
-        )
-
-        self.logger = logging.getLogger('cis-idvtoauth0')
+        self.logger = logging.getLogger(__name__)
 
     def __del__(self):
         self.client_secret = None
