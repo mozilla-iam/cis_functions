@@ -13,21 +13,28 @@ If the profile passes store it in kinesis for processing.
 import base64
 import boto3
 import json
-import logging
 
 # Import the Mozilla CIS library to facilitate core logic interaction.
-from cis.libs import utils
 from cis import processor
+
+from cis.libs import utils
+from cis.settings import get_config
+
+config = get_config()
 
 
 def handle(event, context):
     """This is the main handler called during function invocation."""
-    utils.StructuredLogger(
-        name='cis-validator',
-        level=logging.INFO
-    )
 
-    logger = logging.getLogger('cis-validator')
+    config = get_config()
+    custom_logger = utils.CISLogger(
+        name=__name__,
+        level=config('logging_level', namespace='cis', default='INFO'),
+        cis_logging_output=config('logging_output', namespace='cis', default='stream'),
+        cis_cloudwatch_log_group=config('cloudwatch_log_group', namespace='cis', default='')
+    ).logger()
+
+    logger = custom_logger.get_logger()
 
     # Encrypted profile packet contains ciphertext, iv, etc.
     encrypted_profile_packet = json.loads(base64.b64decode(event.get('profile').encode()))
