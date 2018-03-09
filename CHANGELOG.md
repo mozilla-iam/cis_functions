@@ -16,6 +16,11 @@ _No changes yet_
 - All publishers now require signing.
 - All publishers are only authoritative for their namespaces.
 
+#### Blue Green Deploys ( Labeled as latest/previous )
+TLDR: Blue/green deployment is a technique for releasing applications by shifting  traffic between two identical environments running different versions of the application.
+
+- Releases will now be deployed in parallel to allow Mozillians and other publishers to simply change the entry point.  Edge of what is stable CIS will now be called CIS Latest.  Eventually current "production will change to previous."
+
 ### Changed
 
 #### Logging
