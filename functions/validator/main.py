@@ -39,11 +39,14 @@ def handle(event, context):
     # Encrypted profile packet contains ciphertext, iv, etc.
     encrypted_profile_packet = json.loads(base64.b64decode(event.get('profile').encode()))
     signature = event.get('signature', None)
+    publisher = event.get('publisher', None)
+
+    logger.debug('Attempting to push an event for publisher: {}'.format(publisher))
 
     if signature is not None or signature != {}:
         p = processor.ValidatorOperation(
             boto_session=boto3.Session(region_name='us-west-2'),
-            publisher=event.get('publisher'),
+            publisher=publisher,
             signature=signature,
             encrypted_profile_data=encrypted_profile_packet
         )
@@ -51,7 +54,8 @@ def handle(event, context):
         result = p.run()
         logger.info('The result of the change operation was {r}'.format(r=result))
     else:
-        logger.error('No sigature was present.  This operation was untrusted.')
+        logger.error('No sigature was present. This operation was untrusted.')
         result = False
 
+    logger.info('VALIDATOR: Processed 1 record.')
     return result

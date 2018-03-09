@@ -21,14 +21,17 @@ def handle(event, context):
 
     logger = custom_logger.get_logger()
 
-    logger.info("Stream Processor initialized for stage: streamtoidv.")
+    logger.info('Stream Processor initialized for stage: streamtoidv.')
 
     for record in event['Records']:
         payload = json.loads(
             base64.b64decode(record['kinesis']['data']).decode('utf-8')
         )
 
-        logger.info("Initial payload decoded for user: {}.".format(record.get('user_id')))
+        logger.debug(record['kinesis'])
+
+        logger.info('Initial payload decoded.')
+        logger.debug(json.dumps(payload))
         try:
             p = processor.StreamtoVaultOperation(
                 boto_session=boto3.Session(region_name='us-west-2'),
@@ -39,25 +42,24 @@ def handle(event, context):
 
             res = p.run()
         except Exception as e:
-            logger.error('Error user: {} writing to dynamo due to: {}'.format(record.get('user_id'), e))
+            logger.error('Error writing to dynamo due to: {}'.format(e))
             res = False
 
         logger.info(
-            "Payload decrypted for user {}.  Attempting storage in the vault.".format(
-                record.get('user_id')
+            'Payload decrypted. Attempting storage in the vault.'.format(
             )
         )
 
         # Store the result of the event in the identity vault
 
         logger.info(
-            "Vault storage status is {status} for user {user}.".format(
-                status=res, user=record.get('user_id')
+            'Vault storage status is {}.'.format(
+                res
             )
         )
 
     logger.info(
-        'Successfully processed {} records.'.format(len(event['Records']))
+        'STREAMTOIDV: Successfully processed {} records.'.format(len(event['Records']))
     )
 
-    return 'Successfully processed {} records.'.format(len(event['Records']))
+    return 'STREAMTOIDV: Successfully processed {} records.'.format(len(event['Records']))

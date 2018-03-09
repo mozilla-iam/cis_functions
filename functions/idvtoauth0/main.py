@@ -17,6 +17,7 @@ config = get_config()
 
 
 def find_user(user_id):
+    ### XXX TBD replace this with person-api call or LDAP publisher.
     table_name = os.getenv('CIS_DYNAMODB_TABLE', None)
     dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
     table = dynamodb.Table(table_name)
@@ -33,7 +34,6 @@ def find_user(user_id):
             profile['groups'] = []
 
         return profile
-
     except ClientError:
         return None
 
@@ -48,7 +48,7 @@ def handle(event, context):
     ).logger()
 
     logger = custom_logger.get_logger()
-    logger.info("Stream Processor initialized for stage: idvtoauth0.")
+    logger.info('Stream Processor initialized for stage: idvtoauth0.')
 
     environment = os.getenv('ENVIRONMENT', 'dev')
 
@@ -85,14 +85,19 @@ def handle(event, context):
         # Kinesis data is base64 encoded so decode here
         user_id = record['dynamodb']['Keys']['user_id']['S']
 
-        logger.info("Processing record for user {}".format(user_id))
-        logger.info("Searching for dynamo record for {}".format(user_id))
+        logger.info('Processing record for user: {}'.format(user_id))
+        logger.info('Searching for dynamo record for user: {}'.format(user_id))
 
         profile = find_user(user_id)
-        logger.info("Status of profile search is {}".format(profile))
+        if profile is not {} or None:
+            logger.info('A profile has been located for user: {}'.format(user_id))
 
         if profile is not None:
-            logger.info("The profile is {}".format(profile))
+            logger.info('Attemtping to reintegrate profile for user: {}'.format(user_id))
+            logger.debug('-------------------Pre-Integration---------------------------')
+            logger.debug(profile)
+            logger.debug('------------------------End----------------------------------')
+
             try:
                 upstream_user = client.get_user(user_id)
 
@@ -103,23 +108,29 @@ def handle(event, context):
                     for g in upstream_user['groups']:
                         if g not in profile['groups']:
                             profile['groups'].append(g)
-                            logger.info("Forced re-integration of LDAP group {} for user {}".format(g, user_id))
+                            logger.info('Forced re-integration of LDAP group: {} for user: {}'.format(g, user_id))
 
                 # Update groups only in Auth0
                 profile_groups = {'groups': profile.get('groups')}
                 res = client.update_user(user_id, profile_groups)
-                logger.info("Updating user group information in auth0 for {user_id}".format(user_id=user_id))
+                logger.info('Updating user group information in auth0 for {}'.format(user_id))
+                logger.debug('-------------------Post-Integration--------------------------')
+                logger.debug(profile)
+                logger.debug('------------------------End----------------------------------')
             except Exception as e:
                 """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
                 res = e
-            logger.info("Status of message processing is {s}".format(s=res))
+            logger.info('Auth0 processing complete for for user: {}'.format(res, user_id))
+            logger.debug('-------------------Auth0-Response-----------------------------')
+            logger.debug(res)
+            logger.debug('------------------------End----------------------------------')
         else:
             logger.critical(
-                "User could not be matched in vault for userid : {user_id}".format(user_id=user_id)
+                'User could not be matched in vault for userid : {}'.format(user_id)
             )
 
     logger.info(
-        'Successfully processed {} records.'.format(len(event['Records']))
+        'IDVTOAUTH0: Successfully processed {} records.'.format(len(event['Records']))
     )
 
-    return 'Successfully processed {} records.'.format(len(event['Records']))
+    return 'IDVTOAUTH0: Successfully processed {} records.'.format(len(event['Records']))

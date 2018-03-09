@@ -16,6 +16,10 @@ _No changes yet_
 - All publishers now require signing.
 - All publishers are only authoritative for their namespaces.
 
+#### Blue Green Deploys
+
+- Releases will now be deployed in parallel to allow mozillians and other publishers to simply change the entry point.
+
 ### Changed
 
 #### Logging
