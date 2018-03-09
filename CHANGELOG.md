@@ -18,7 +18,7 @@ _No changes yet_
 
 #### Blue Green Deploys
 
-- Releases will now be deployed in parallel to allow mozillians and other publishers to simply change the entry point.
+- Releases will now be deployed in parallel to allow Mozillians and other publishers to simply change the entry point.  Edge of what is stable CIS will now be called CIS Latest.  Eventually current "production will change to previous."
 
 ### Changed
 

@@ -17,7 +17,7 @@ config = get_config()
 
 
 def find_user(user_id):
-    ### XXX TBD replace this with person-api call or LDAP publisher.
+    # XXX TBD replace this with person-api call or LDAP publisher.
     table_name = os.getenv('CIS_DYNAMODB_TABLE', None)
     dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
     table = dynamodb.Table(table_name)
