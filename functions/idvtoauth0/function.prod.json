@@ -8,10 +8,13 @@
     "CIS_DYNAMODB_TABLE": "cis-stream-prod-and-idv-IdentityVaultUsers-LMGGZ2XE8K6F",
     "CIS_KINESIS_STREAM_ARN": "arn:aws:kinesis:us-west-2:371522382791:stream/cis-stream-prod-and-idv-CISInputStream-1R29T8G6ZQTQ5",
     "CIS_KINESIS_STREAM_NAME": "cis-stream-prod-and-idv-CISInputStream-1R29T8G6ZQTQ5",
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "CIS_LOGGING_OUTPUT": "cloudwatch",
+    "CIS_CLOUDWATCH_LOG_GROUP": "staging",
+    "CIS_LOGGING_LEVEL": "DEBUG"
   },
   "hooks":{
-    "build": "pip3 install -r ../../requirements.txt -t .",
+    "build": "pip3 install -r ../../requirements-prod.txt -t .",
     "clean": "/bin/bash clean.sh"
   }
 }

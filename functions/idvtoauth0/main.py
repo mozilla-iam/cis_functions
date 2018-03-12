@@ -6,15 +6,18 @@ which is in turn used to create the id_token JWT and fill the user info endpoint
 import authzero
 import boto3
 import credstash
-import logging
 import os
 
-
 from botocore.exceptions import ClientError
+
 from cis.libs import utils
+from cis.settings import get_config
+
+config = get_config()
 
 
 def find_user(user_id):
+    # XXX TBD replace this with person-api call or LDAP publisher.
     table_name = os.getenv('CIS_DYNAMODB_TABLE', None)
     dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
     table = dynamodb.Table(table_name)
@@ -31,19 +34,21 @@ def find_user(user_id):
             profile['groups'] = []
 
         return profile
-
     except ClientError:
         return None
 
 
 def handle(event, context):
-    utils.StructuredLogger(
-        name='cis-idvtoauth0',
-        level=logging.INFO
-    )
+    config = get_config()
+    custom_logger = utils.CISLogger(
+        name=__name__,
+        level=config('logging_level', namespace='cis', default='INFO'),
+        cis_logging_output=config('logging_output', namespace='cis', default='stream'),
+        cis_cloudwatch_log_group=config('cloudwatch_log_group', namespace='cis', default='')
+    ).logger()
 
-    logger = logging.getLogger('cis-idvtoauth0')
-    logger.info("Stream Processor initialized.")
+    logger = custom_logger.get_logger()
+    logger.info('Stream Processor initialized for stage: idvtoauth0.')
 
     environment = os.getenv('ENVIRONMENT', 'dev')
 
@@ -78,18 +83,21 @@ def handle(event, context):
 
     for record in event['Records']:
         # Kinesis data is base64 encoded so decode here
-        logger.info("Record is loaded.")
-        logger.info("Processing {record}".format(record=record))
         user_id = record['dynamodb']['Keys']['user_id']['S']
 
-        logger.info("Initial payload decoded.")
-        logger.info("Searching for dynamo record for {u}".format(u=user_id))
-        profile = find_user(user_id)
+        logger.info('Processing record for user: {}'.format(user_id))
+        logger.info('Searching for dynamo record for user: {}'.format(user_id))
 
-        logger.info("Status of profile search is {s}".format(s=profile))
+        profile = find_user(user_id)
+        if profile is not {} or None:
+            logger.info('A profile has been located for user: {}'.format(user_id))
 
         if profile is not None:
-            logger.info("The profile is {}".format(profile))
+            logger.info('Attemtping to reintegrate profile for user: {}'.format(user_id))
+            logger.debug('-------------------Pre-Integration---------------------------')
+            logger.debug(profile)
+            logger.debug('------------------------End----------------------------------')
+
             try:
                 upstream_user = client.get_user(user_id)
 
@@ -100,23 +108,29 @@ def handle(event, context):
                     for g in upstream_user['groups']:
                         if g not in profile['groups']:
                             profile['groups'].append(g)
-                            logger.info("Forced re-integration of LDAP group {}".format(g))
+                            logger.info('Forced re-integration of LDAP group: {} for user: {}'.format(g, user_id))
 
                 # Update groups only in Auth0
                 profile_groups = {'groups': profile.get('groups')}
                 res = client.update_user(user_id, profile_groups)
-                logger.info("Updating user group information in auth0 for {user_id}".format(user_id=user_id))
+                logger.info('Updating user group information in auth0 for {}'.format(user_id))
+                logger.debug('-------------------Post-Integration--------------------------')
+                logger.debug(profile)
+                logger.debug('------------------------End----------------------------------')
             except Exception as e:
                 """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
                 res = e
-            logger.info("Status of message processing is {s}".format(s=res))
+            logger.info('Auth0 processing complete for for user: {}'.format(res, user_id))
+            logger.debug('-------------------Auth0-Response-----------------------------')
+            logger.debug(res)
+            logger.debug('------------------------End----------------------------------')
         else:
             logger.critical(
-                "User could not be matched in vault for userid : {user_id}".format(user_id=user_id)
+                'User could not be matched in vault for userid : {}'.format(user_id)
             )
 
     logger.info(
-        'Successfully processed {} records.'.format(len(event['Records']))
+        'IDVTOAUTH0: Successfully processed {} records.'.format(len(event['Records']))
     )
 
-    return 'Successfully processed {} records.'.format(len(event['Records']))
+    return 'IDVTOAUTH0: Successfully processed {} records.'.format(len(event['Records']))

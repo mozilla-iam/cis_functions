@@ -1,8 +1,8 @@
 {
   "runtime": "python3.6",
   "handler": "main.handle",
-  "description": "The change integration stream consumer that updates the identity vault",
-  "role": "arn:aws:iam::371522382791:role/cis-prod-roles-StreamToIDV-1VH2R92B6879F",
+  "description": "The change integration service identity vault to auth0 driver.",
+  "role": "arn:aws:iam::371522382791:role/cis-prod-roles-IDVtoIDMDriver-1RCFMGZADHHFK",
   "environment": {
     "CIS_ARN_MASTER_KEY": "arn:aws:kms:us-west-2:371522382791:key/adef50ad-2846-46df-b783-1c8f35e858cb",
     "CIS_DYNAMODB_TABLE": "cis-stream-prod-and-idv-IdentityVaultUsers-LMGGZ2XE8K6F",
@@ -10,11 +10,11 @@
     "CIS_KINESIS_STREAM_NAME": "cis-stream-prod-and-idv-CISInputStream-1R29T8G6ZQTQ5",
     "ENVIRONMENT": "production",
     "CIS_LOGGING_OUTPUT": "cloudwatch",
-    "CIS_CLOUDWATCH_LOG_GROUP": "staging",
+    "CIS_CLOUDWATCH_LOG_GROUP": "production",
     "CIS_LOGGING_LEVEL": "DEBUG"
   },
   "hooks":{
-    "build": "pip3 install -r ../../requirements-prod.txt -t .",
+    "build": "pip3 install -r ../../requirements-prod.latest.txt -t .",
     "clean": "/bin/bash clean.sh"
   }
 }
