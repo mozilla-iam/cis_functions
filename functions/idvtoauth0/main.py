@@ -6,7 +6,9 @@ which is in turn used to create the id_token JWT and fill the user info endpoint
 import authzero
 import boto3
 import credstash
+import json
 import os
+import re
 
 from botocore.exceptions import ClientError
 
@@ -95,31 +97,26 @@ def handle(event, context):
         if profile is not None:
             logger.info('Attemtping to reintegrate profile for user: {}'.format(user_id))
             logger.debug('-------------------Pre-Integration---------------------------')
-            logger.debug(profile)
+            logger.debug(json.dumps(profile))
             logger.debug('------------------------End----------------------------------')
 
-            try:
-                upstream_user = client.get_user(user_id)
+            compatible_group_list = []
+            # Strip the LDAP prefix from LDAP groups for compatibility
+            for group in profile.get('groups'):
+                if group.startswith('ldap_'):
+                    compatible_group_list.append(re.sub('ldap_', '', group))
+                else:
+                    compatible_group_list.append(group)
 
-                # XXX Attempt forced LDAP group reintegration
-                # Remove when we have an LDAP CIS Publisher
-                # And replace with a "user add" and "user remove/block" functionality
-                if 'groups' in upstream_user.keys():
-                    for g in upstream_user['groups']:
-                        if g not in profile['groups']:
-                            profile['groups'].append(g)
-                            logger.info('Forced re-integration of LDAP group: {} for user: {}'.format(g, user_id))
+            # Update groups only in Auth0
+            profile_groups = {'groups': compatible_group_list}
 
-                # Update groups only in Auth0
-                profile_groups = {'groups': profile.get('groups')}
-                res = client.update_user(user_id, profile_groups)
-                logger.info('Updating user group information in auth0 for {}'.format(user_id))
-                logger.debug('-------------------Post-Integration--------------------------')
-                logger.debug(profile)
-                logger.debug('------------------------End----------------------------------')
-            except Exception as e:
-                """Temporarily patch around raising inside loop until authzero.py can become part of CIS core."""
-                res = e
+            res = client.update_user(user_id, profile_groups)
+            logger.info('Updating user group information in auth0 for {}'.format(user_id))
+            logger.debug('-------------------Post-Integration--------------------------')
+            logger.debug(json.dumps(profile))
+            logger.debug('------------------------End----------------------------------')
+
             logger.info('Auth0 processing complete for for user: {}'.format(res, user_id))
             logger.debug('-------------------Auth0-Response-----------------------------')
             logger.debug(res)
