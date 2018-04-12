@@ -6,6 +6,7 @@ which is in turn used to create the id_token JWT and fill the user info endpoint
 import authzero
 import boto3
 import credstash
+import json
 import os
 import re
 
