@@ -105,8 +105,8 @@ def handle(event, context):
                 res = client.update_user(user_id, profile_groups)
             except Exception as e:
                 # if the user does not exist in auth0, we just skip the record
-                if len(e) > 0:
-                    if e[0] == "HTTPCommunicationFailed" and e[1][0] == 404:
+                if len(e.args) > 0:
+                    if e.args[0] == "HTTPCommunicationFailed" and e.args[1][0] == 404:
                         logger.info("User {} does not exist in Auth0, skipping record".format(user_id))
                         logger.debug("Exception (handled) was: {}".format(e))
                         continue
