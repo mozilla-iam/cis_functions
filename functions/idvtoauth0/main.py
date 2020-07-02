@@ -122,7 +122,7 @@ def handle(event, context):
             logger.debug(json.dumps(profile))
             logger.debug("------------------------End----------------------------------")
 
-            logger.info("Auth0 processing complete for for user: {}".format(res, user_id))
+            logger.info("Auth0 processing complete for for user: {}".format(user_id))
             logger.debug("-------------------Auth0-Response-----------------------------")
             logger.debug(res)
             logger.debug("------------------------End----------------------------------")

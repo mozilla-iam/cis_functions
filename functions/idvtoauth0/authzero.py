@@ -165,7 +165,7 @@ class CISAuthZero(object):
         if (response.status >= 300) or (response.status < 200):
             tmp = response.read()
             self.logger.debug("_check_http_response() HTTP communication failed: {} {}".format(
-                response.status, response.reason, tmp
+                response.status, response.reason
                 )
             )
             raise Exception('HTTPCommunicationFailed', (response.status, response.reason, tmp))
