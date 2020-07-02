@@ -15,6 +15,9 @@ from botocore.exceptions import ClientError
 from cis.libs import utils
 from cis.settings import get_config
 
+EXCLUDED_USER_IDS = ["ad|Mozilla-LDAP|FMerz", "ad|Mozilla-LDAP|gene"]
+
+
 config = get_config()
 
 
@@ -78,6 +81,9 @@ def handle(event, context):
         user_id = record["dynamodb"]["Keys"]["user_id"]["S"]
 
         logger.info("Processing record for user: {}".format(user_id))
+        if user_id in EXCLUDED_USER_IDS:
+            logger.info("Skipping user (exclude_list): {}".format(user_id))
+            continue
         logger.info("Searching for dynamo record for user: {}".format(user_id))
 
         profile = find_user(user_id)
@@ -116,7 +122,7 @@ def handle(event, context):
             logger.debug(json.dumps(profile))
             logger.debug("------------------------End----------------------------------")
 
-            logger.info("Auth0 processing complete for for user: {}".format(res, user_id))
+            logger.info("Auth0 processing complete for for user: {}".format(user_id))
             logger.debug("-------------------Auth0-Response-----------------------------")
             logger.debug(res)
             logger.debug("------------------------End----------------------------------")
