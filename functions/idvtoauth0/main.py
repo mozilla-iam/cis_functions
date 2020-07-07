@@ -3,40 +3,13 @@ This is the body of the lambda function for the Auth0 Identity driver of CIS
 This function retrieves user profiles from the CIS ID Vault and sends the appropriate data to the Auth0 API
 which is in turn used to create the id_token JWT and fill the user info endpoint ('profile' scope)
 """
-import authzero
-import boto3
-import credstash
-import json
 import os
-import re
-
-from botocore.exceptions import ClientError
 
 from cis.libs import utils
 from cis.settings import get_config
 
-EXCLUDED_USER_IDS = ["ad|Mozilla-LDAP|FMerz", "ad|Mozilla-LDAP|gene"]
-
 
 config = get_config()
-
-
-def find_user(user_id):
-    # XXX TBD replace this with person-api call or LDAP publisher.
-    table_name = os.getenv("CIS_DYNAMODB_TABLE", None)
-    dynamodb = boto3.resource("dynamodb", region_name="us-west-2")
-    table = dynamodb.Table(table_name)
-    try:
-        res = table.get_item(Key={"user_id": user_id})
-        profile = res.get("Item", None)
-
-        # Fix null values workaround for DynamoDB limitation
-        if profile and profile["groups"] == "NULL":
-            profile["groups"] = []
-
-        return profile
-    except ClientError:
-        return None
 
 
 def handle(event, context):
@@ -53,82 +26,9 @@ def handle(event, context):
 
     environment = os.getenv("ENVIRONMENT", "dev")
 
-    if environment == "production":
-        environment = "prod"
-    else:
+    if environment != "production":
         logger.info("Development stage recognized.  Applying to credstash.")
-        environment = "dev"
 
-    # New up the config object for CISAuthZero
-    config = authzero.DotDict(dict())
-    config.client_id = credstash.getSecret(
-        name="cis.client_id", context={"app": "cis", "environment": environment}, region="us-west-2"
-    )
+    logger.info("IDVTOAUTH0: Skipped all {} records.".format(len(event["Records"])))
 
-    config.client_secret = credstash.getSecret(
-        name="cis.client_secret", context={"app": "cis", "environment": environment}, region="us-west-2"
-    )
-
-    config.uri = credstash.getSecret(
-        name="cis.uri", context={"app": "cis", "environment": environment}, region="us-west-2"
-    )
-
-    client = authzero.CISAuthZero(config)
-    client.get_access_token()
-
-    for record in event["Records"]:
-        # Kinesis data is base64 encoded so decode here
-        user_id = record["dynamodb"]["Keys"]["user_id"]["S"]
-
-        logger.info("Processing record for user: {}".format(user_id))
-        if user_id in EXCLUDED_USER_IDS:
-            logger.info("Skipping user (exclude_list): {}".format(user_id))
-            continue
-        logger.info("Searching for dynamo record for user: {}".format(user_id))
-
-        profile = find_user(user_id)
-        if profile is not {} or None:
-            logger.info("A profile has been located for user: {}".format(user_id))
-
-        if profile is not None:
-            logger.info("Attemtping to reintegrate profile for user: {}".format(user_id))
-            logger.debug("-------------------Pre-Integration---------------------------")
-            logger.debug(json.dumps(profile))
-            logger.debug("------------------------End----------------------------------")
-
-            compatible_group_list = []
-            # Strip the LDAP prefix from LDAP groups for compatibility
-            for group in profile.get("groups"):
-                if group.startswith("ldap_"):
-                    compatible_group_list.append(re.sub("ldap_", "", group))
-                else:
-                    compatible_group_list.append(group)
-
-            # Update groups only in Auth0
-            profile_groups = {"groups": compatible_group_list}
-
-            try:
-                res = client.update_user(user_id, profile_groups)
-            except Exception as e:
-                # if the user does not exist in auth0, we just skip the record
-                if len(e.args) > 0:
-                    if e.args[0] == "HTTPCommunicationFailed" and e.args[1][0] == 404:
-                        logger.info("User {} does not exist in Auth0, skipping record".format(user_id))
-                        logger.debug("Exception (handled) was: {}".format(e))
-                        continue
-
-            logger.info("Updating user group information in auth0 for {}".format(user_id))
-            logger.debug("-------------------Post-Integration--------------------------")
-            logger.debug(json.dumps(profile))
-            logger.debug("------------------------End----------------------------------")
-
-            logger.info("Auth0 processing complete for for user: {}".format(user_id))
-            logger.debug("-------------------Auth0-Response-----------------------------")
-            logger.debug(res)
-            logger.debug("------------------------End----------------------------------")
-        else:
-            logger.critical("User could not be matched in vault for userid : {}".format(user_id))
-
-    logger.info("IDVTOAUTH0: Successfully processed {} records.".format(len(event["Records"])))
-
-    return "IDVTOAUTH0: Successfully processed {} records.".format(len(event["Records"]))
+    return "IDVTOAUTH0: Skipped all {} records.".format(len(event["Records"]))
