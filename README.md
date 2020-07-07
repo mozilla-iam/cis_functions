@@ -59,6 +59,21 @@ See the container project for the reasons why you'd want to use the container in
 
 2. Do business as usual.
 
+# Deploying using CodePipeline and CodeBuild
+
+* Create a PR from `master` to the `production` branch and merge the PR, 
+  creating a commit to the [`production` branch](https://github.com/mozilla-iam/cis_functions/tree/production)
+* This triggers a CodePipeline [job in the `infosec-prod` AWS account in 
+  `us-west-2` called `cis_functions-prod`](https://us-west-2.console.aws.amazon.com/codesuite/codepipeline/pipelines/cis_functions-prod/view?region=us-west-2)
+* Once the `Source` step of the pipeline completes where it fetches the source
+  code from GitHub, it waits at the `Approval` step
+  * This fetch is made using the `infosec-prod-371522382791-codebuild` GitHub user
+    which governs the AWS to GitHub integration. Credentials can be found in the GPG
+    key store.
+* [Approve the approval step](https://us-west-2.console.aws.amazon.com/codesuite/codepipeline/pipelines/cis_functions-prod/view?region=us-west-2) in CodePipeline to continue to the deploy
+* From here the [`cis_functions-apex-production` job in CodeBuild](https://us-west-2.console.aws.amazon.com/codesuite/codebuild/371522382791/projects/cis_functions-apex-production/history?region=us-west-2) is triggered
+* The deploy should take about 2 minutes
+
 # CI/CD pipelines
 
 1. Commits to master branch automatically run `apex deploy -e stage`
