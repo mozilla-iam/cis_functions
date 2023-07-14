@@ -12,7 +12,7 @@ chardet==3.0.4
 configobj==5.0.6
 cookies==2.2.1
 credstash==1.14.0
-cryptography==2.0.0
+cryptography==41.0.2
 docker==3.1.1
 docker-pycreds==0.2.2
 docutils==0.14
